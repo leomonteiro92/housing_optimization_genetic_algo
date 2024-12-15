@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import List
 from datetime import date
 
 
@@ -12,7 +12,17 @@ class Location:
         return f"Location(lat={self.lat}, lon={self.lon}, deadline={self.deadline})"
 
 
-type Route = List[(date, Location)]
-
 type Agent = str
-type Solution = Tuple[Agent, Route]
+
+
+class Gene:
+    def __init__(self, agent: Agent, visit_date: date, location: Location):
+        self.agent: Agent = agent
+        self.visit_date: date = visit_date
+        self.location: Location = location
+
+    def __repr__(self):
+        return f"Gene(agent={self.agent}, date={self.visit_date}, location={self.location})"
+
+
+type Individual = List[Gene]

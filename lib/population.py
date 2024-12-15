@@ -1,7 +1,8 @@
 import random
 from datetime import date, timedelta
 from typing import List
-from model.types import Location, Solution, Agent, Route
+
+from model.types import Location, Individual, Agent, Gene
 
 # SP Zona Centro Sul
 lat_min, lat_max = -23.55, -23.60
@@ -29,36 +30,38 @@ def gen_agents(n: int) -> List[Agent]:
     return agents
 
 
-def _gen_random_solutions(houses: List[Location], agents: List[str]) -> List[Solution]:
+def _gen_random_individual(houses: List[Location], agents: List[str]) -> Individual:
     # Inicialmente vamos distribuir as casas de forma aleatória e proporcionalmente distribuídas entre os agentes
     houses_per_agent_rate: int = len(houses) // len(agents)
+    remainder = len(houses) % len(agents)
 
     # Fazemos uma copia e embaralharamos as casas
     houses_copy = houses.copy()
     random.shuffle(houses)
 
-    result: List[Agent] = []
-    for agent in agents:
+    result: List[Gene] = []
+    start = 0
+    for i in range(len(agents)):
+        current_size = houses_per_agent_rate + (1 if i < remainder else 0)
         # Cada agente vai pegar um slice das casas representado por houses_per_agent_rate
-        houses_for_agent = houses_copy[0:houses_per_agent_rate]
-
-        route: List[Route] = []
-        for house in houses_for_agent:
+        houses_per_agent = houses_copy[start : start + current_size]
+        for house in houses_per_agent:
             # Para cada casa assignalada para um agente, vamos aleatóriamente selecionar uma data de visita
             date_delta = date_max - house.deadline
             random_secs = random.uniform(0, date_delta.total_seconds())
             schedule_date = date_min + timedelta(seconds=random_secs)
 
-            route.append((schedule_date, house))
-        result.append((agent, route))
-        del houses_copy[0:houses_per_agent_rate]
+            result.append(
+                Gene(agent=agents[i], visit_date=schedule_date, location=house)
+            )
+        start += current_size
     return result
 
 
-def gen_chromossomes(
+def gen_random_initial_population(
     n: int, houses: List[Location], agents: List[str]
-) -> List[Solution]:
-    chromossomes: List[Solution] = []
+) -> List[Individual]:
+    individuals: Individual = []
     for _ in range(n):
-        chromossomes.append(_gen_random_solutions(houses, agents))
-    return chromossomes
+        individuals.append(_gen_random_individual(houses, agents))
+    return individuals
