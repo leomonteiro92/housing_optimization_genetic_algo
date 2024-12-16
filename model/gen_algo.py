@@ -1,11 +1,11 @@
 import itertools
-import numpy as np
 import random
 
 from lib.population import gen_houses, gen_agents, gen_random_initial_population
-from lib.metrics import fitness
+from lib.metrics import fitness, is_valid_solution
 import lib.crossover as xover
 import lib.mutation as mut
+from model.types import Individual
 
 
 class GeneticAlgorithm:
@@ -25,7 +25,6 @@ class GeneticAlgorithm:
         self.population = gen_random_initial_population(
             self.population_size, self.houses, self.agents
         )
-        print(self.population)
         self.best_solution = None
         self.best_fitness_scores = []
         self.generation_counter = itertools.count(start=1)
@@ -60,15 +59,21 @@ class GeneticAlgorithm:
 
         # Debugging
         if generation < 10 or generation % 10 == 0:
-            print(f"Generation {generation}: {best_individual_score}")
+            print(f"::Generation {generation}: {best_individual_score}")
 
         new_population = [best_individual]
 
         rate = [(1 / score) if score > 0 else 0 for score in scores]
         while len(new_population) < self.population_size:
             parent1, parent2 = random.choices(self.population, weights=rate, k=2)
-            child = xover.OX1(parent1, parent2)
-            child = mut.mutate(child, self.mutation_rate)
+            child = self.crossover(parent1, parent2)
+            child = self.mutate(child)
             new_population.append(child)
 
         self.population = new_population
+
+    def crossover(self, parent1: Individual, parent2: Individual) -> Individual:
+        return xover.v2(self.agents, parent1, parent2)
+
+    def mutate(self, individual: Individual) -> Individual:
+        return mut.v2(individual, self.mutation_rate)

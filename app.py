@@ -1,6 +1,6 @@
-import matplotlib.pyplot as plt
 import streamlit as st
 import time
+from utils import generate_map, plot_genetic_algorithm_score, print_individual
 
 from model.gen_algo import GeneticAlgorithm
 
@@ -9,18 +9,7 @@ MUTATION_RATE = 0.5
 MAX_GENERATIONS = 100
 
 model: GeneticAlgorithm = GeneticAlgorithm(POPULATION_SIZE, MUTATION_RATE)
-
-
-def plot_score(x, y):
-    plt.close("all")
-    fig, ax = plt.subplots(figsize=(4, 4), dpi=100)
-    ax.plot(x, y)
-    ax.set_xlabel("Generation")
-    ax.set_ylabel("Score")
-    ax.legend()
-
-    return fig
-
+print_individual(model.population[0])
 
 st.write("### Score")
 plot_placeholder = st.empty()
@@ -32,9 +21,12 @@ for i in range(MAX_GENERATIONS):
     model.evolve()
     best_individual = model.best_solution
     best_individual_score = model.best_fitness_scores[-1]
-    fig = plot_score(range(len(model.best_fitness_scores)), model.best_fitness_scores)
+    fig = plot_genetic_algorithm_score(
+        range(len(model.best_fitness_scores)), model.best_fitness_scores
+    )
     plot_placeholder.pyplot(fig)
 
-    # time.sleep(0.5)
+    time.sleep(60)
 
-st.success(f"Best score: {best_individual}")
+st.success(f"Best score: {best_individual_score}")
+generate_map(model.houses, model.agents, best_individual).save("map.html")

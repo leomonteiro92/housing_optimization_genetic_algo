@@ -4,6 +4,8 @@ from geopy.distance import geodesic
 
 from model.types import Location, Individual, Agent
 
+PENALTY_FACTOR = 100
+
 
 def fitness(
     individual: Individual,
@@ -29,8 +31,13 @@ def fitness(
 def _get_total_date_penalty(individual: Individual) -> float:
     penalty_data = []
     for gene in individual:
-        penalty = (gene.visit_date - gene.location.deadline).days
-        penalty_data.append(abs(penalty))
+        delta_days = (gene.visit_date - gene.location.deadline).days
+        if delta_days > 0:
+            penalty_data.append(PENALTY_FACTOR * delta_days * 10)
+        elif delta_days == 0:
+            penalty_data.append(PENALTY_FACTOR / 2)
+        else:
+            penalty_data.append(10 / abs(delta_days))
     return np.sum(penalty_data)
 
 
@@ -56,30 +63,18 @@ def _get_total_visits_penalty(
     idle_penalty = 0
     for agent in agents:
         if agent not in agents_per_visit_map:
-            idle_penalty += 100000
+            idle_penalty += PENALTY_FACTOR * 1000
             agents_per_visit_map[agent] = 0
 
     num_visits = [v for _, v in agents_per_visit_map.items()]
     std_dev = np.std(num_visits)
-    uneven_penalty = std_dev * 10
+    uneven_penalty = std_dev * PENALTY_FACTOR
     return (idle_penalty, uneven_penalty)
 
 
-def _get_uneven_visits_penalty(individual: Individual, agents: List[Agent]) -> float:
-    agents_per_visit_map = {}
-    for gene in individual:
-        if gene.agent not in agents_per_visit_map:
-            agents_per_visit_map[gene.agent] = 0
-        agents_per_visit_map[gene.agent] += 1
-
-    num_visits = [v for _, v in agents_per_visit_map.items()]
-    std_dev = np.std(num_visits)
-    return std_dev * 100000
-
-
 def is_valid_solution(locations: List[Location], individual: Individual) -> bool:
-    visited_locations_len: Set[Location] = set()
+    visited_locations: Set[Location] = set()
     for gene in individual:
-        visited_locations_len.add(gene.location)
+        visited_locations.add(gene.location)
 
-    return len(visited_locations_len) == len(locations)
+    return len(visited_locations) == len(locations)
