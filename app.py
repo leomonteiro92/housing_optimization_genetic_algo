@@ -6,7 +6,7 @@ from model.gen_algo import GeneticAlgorithm
 
 POPULATION_SIZE = 10
 MUTATION_RATE = 0.5
-MAX_GENERATIONS = 100
+MAX_GENERATIONS = 1000
 
 model: GeneticAlgorithm = GeneticAlgorithm(POPULATION_SIZE, MUTATION_RATE)
 print_individual(model.population[0])
@@ -26,7 +26,6 @@ for i in range(MAX_GENERATIONS):
     )
     plot_placeholder.pyplot(fig)
 
-    time.sleep(60)
 
 st.success(f"Best score: {best_individual_score}")
 generate_map(model.houses, model.agents, best_individual).save("map.html")

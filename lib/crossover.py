@@ -1,10 +1,11 @@
 import random
 
-from typing import List
+from typing import List, Tuple
 from model.types import Individual, Agent, Gene
 
 
-def OX1(parent1: Individual, parent2: Individual) -> Individual:
+# deprecated
+def v1(parent1: Individual, parent2: Individual) -> Individual:
     n = len(parent1)
 
     start_index = random.randint(0, n - 1)
@@ -24,21 +25,21 @@ def OX1(parent1: Individual, parent2: Individual) -> Individual:
     return child
 
 
-def _agent_genes(agents: List[Agent], parent: Individual) -> List[Gene]:
-    return [gene for gene in parent if gene.agent in agents]
+def v3(parent1: Individual, parent2: Individual) -> Individual:
+    # combine genes that share the same agent and same location
+    parent1_set = set(parent1)
+    parent2_set = set(parent2)
+    same_genes = parent1_set.intersection(parent2_set)
+    other_genes = parent1_set.union(parent2_set) - same_genes
 
+    genes_list = list(other_genes)
+    child = []
+    while len(genes_list) > 0:
+        chosen_gene = random.choice(genes_list)
+        child.append(chosen_gene)
+        without_location = [
+            gene for gene in genes_list if gene.location != chosen_gene.location
+        ]
+        genes_list = without_location
 
-def v2(agents: List[str], parent1: Individual, parent2: Individual) -> Individual:
-    n = len(agents)
-
-    start_index = random.randint(0, n - 1)
-    end_index = random.randint(start_index + 1, n)
-
-    parent1_agents = agents[start_index:end_index]
-    parent2_agents = [agent for agent in agents if agent not in parent1_agents]
-
-    segment1 = _agent_genes(parent1_agents, parent1)
-    segment2 = _agent_genes(parent2_agents, parent2)
-    child = segment1 + segment2
-
-    return child
+    return parent1

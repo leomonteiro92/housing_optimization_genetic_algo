@@ -73,7 +73,7 @@ class GeneticAlgorithm:
         self.population = new_population
 
     def crossover(self, parent1: Individual, parent2: Individual) -> Individual:
-        return xover.v2(self.agents, parent1, parent2)
+        return xover.v3(parent1, parent2)
 
     def mutate(self, individual: Individual) -> Individual:
         return mut.v2(individual, self.mutation_rate)

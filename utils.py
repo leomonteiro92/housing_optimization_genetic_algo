@@ -52,7 +52,7 @@ def generate_map(
             color=_random_color(),
             weight=4,
             opacity=0.7,
-            tooltip=f"Agent: {gene.agent}",
+            tooltip=f"Agent: {agent}",
         ).add_to(m)
     return m
 
@@ -65,5 +65,6 @@ def print_individual(individual: Individual):
         agentsMap[gene.agent].append(gene)
 
     for agent, genes in agentsMap.items():
-        route = [gene.location.label for gene in genes]
+        sorted_genes = sorted(genes, key=lambda x: x.visit_date)
+        route = [f"{gene.location.label} on {gene.visit_date}" for gene in sorted_genes]
         print(f"Agent: {agent} - Route: {route}")

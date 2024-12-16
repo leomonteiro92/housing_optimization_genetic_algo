@@ -4,7 +4,8 @@ import random
 from model.types import Individual, Gene
 
 
-def mutate(individual: Individual, mutation_rate: float) -> Individual:
+# deprecated
+def v1(individual: Individual, mutation_rate: float) -> Individual:
     mutated_individual = copy.deepcopy(individual)
 
     if random.random() < mutation_rate:
@@ -34,6 +35,12 @@ def v2(individual: Individual, mutation_rate: float) -> Individual:
         gene2: Gene = mutated_individual[idx2]
         gene1.agent, gene2.agent = gene2.agent, gene1.agent
         gene1.location, gene2.location = gene2.location, gene1.location
+
+        idx3, idx4 = random.sample(range(n), 2)
+        gene3: Gene = mutated_individual[idx3]
+        gene4: Gene = mutated_individual[idx4]
+        gene3.visit_date, gene4.visit_date = gene4.visit_date, gene3.visit_date
+
         mutated_individual[idx1] = gene1
         mutated_individual[idx2] = gene2
 
