@@ -1,11 +1,10 @@
 import itertools
 import random
+import copy
 
 from lib.population import gen_houses, gen_agents, gen_random_initial_population
-from lib.metrics import fitness, is_valid_solution
-import lib.crossover as xover
-import lib.mutation as mut
-from model.types import Individual
+from lib.metrics import fitness
+from model.types import Individual, Gene
 
 
 class GeneticAlgorithm:
@@ -20,8 +19,8 @@ class GeneticAlgorithm:
     ):
         self.population_size = population_size
         self.mutation_rate = mutation_rate
-        self.houses = gen_houses(10)
-        self.agents = gen_agents(3)
+        self.houses = gen_houses(25)
+        self.agents = gen_agents(6)
         self.population = gen_random_initial_population(
             self.population_size, self.houses, self.agents
         )
@@ -73,7 +72,52 @@ class GeneticAlgorithm:
         self.population = new_population
 
     def crossover(self, parent1: Individual, parent2: Individual) -> Individual:
-        return xover.v3(parent1, parent2)
+        parent1_set = set(parent1)
+
+        parent2_set = set(parent2)
+        same_genes = parent1_set.intersection(parent2_set)
+        other_genes = parent1_set.union(parent2_set) - same_genes
+
+        genes_list = list(other_genes | same_genes)
+        child = []
+        while len(genes_list) > 0:
+            chosen_gene = random.choice(genes_list)
+            child.append(chosen_gene)
+            without_location = [
+                gene for gene in genes_list if gene.location != chosen_gene.location
+            ]
+            genes_list = without_location
+
+        return child
 
     def mutate(self, individual: Individual) -> Individual:
-        return mut.v2(individual, self.mutation_rate)
+        if random.random() < self.mutation_rate:
+            return individual
+
+        n = len(individual)
+        if n < 2:
+            return individual
+
+        mutated_individual = copy.deepcopy(individual)
+
+        idx1, idx2 = random.sample(range(n), 2)
+        gene1: Gene = mutated_individual[idx1]
+        gene2: Gene = mutated_individual[idx2]
+        gene1.agent, gene2.agent = gene2.agent, gene1.agent
+        gene1.location, gene2.location = gene2.location, gene1.location
+
+        mutated_individual[idx1] = gene1
+        mutated_individual[idx2] = gene2
+
+        idx3, idx4 = random.sample(range(n), 2)
+        gene3: Gene = mutated_individual[idx3]
+        gene4: Gene = mutated_individual[idx4]
+        gene3.visit_date, gene4.visit_date = gene4.visit_date, gene3.visit_date
+
+        mutated_individual[idx3] = gene3
+        mutated_individual[idx4] = gene4
+
+        gene = random.choice(mutated_individual)
+        gene.agent = random.choice(self.agents)
+
+        return mutated_individual
