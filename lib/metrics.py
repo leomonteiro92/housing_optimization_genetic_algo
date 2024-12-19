@@ -23,7 +23,7 @@ def fitness(
     mean_dist = _get_mean_distance(agents_visit_map)
     total_date_penalty = _get_total_date_penalty(individual)
     (idle_agents_penalty, uneven_visits_penalty) = _get_total_visits_penalty(
-        individual, agents
+        agents_visit_map, agents
     )
 
     return (
@@ -32,6 +32,26 @@ def fitness(
         + w3 * idle_agents_penalty
         + w4 * uneven_visits_penalty
     )
+
+
+def fitness_data(
+    individual: Individual,
+    agents: List[Agent],
+) -> Tuple[float, float, float, float]:
+
+    agents_visit_map: Dict[Agent, List[Gene]] = {}
+    for gene in individual:
+        if gene.agent not in agents_visit_map:
+            agents_visit_map[gene.agent] = []
+        agents_visit_map[gene.agent].append(gene)
+
+    mean_dist = _get_mean_distance(agents_visit_map)
+    total_date_penalty = _get_total_date_penalty(individual)
+    (idle_agents_penalty, uneven_visits_penalty) = _get_total_visits_penalty(
+        agents_visit_map, agents
+    )
+
+    return (mean_dist, total_date_penalty, idle_agents_penalty, uneven_visits_penalty)
 
 
 def _get_total_date_penalty(individual: Individual) -> float:
@@ -67,28 +87,19 @@ def _get_mean_distance(agents_map: Dict[Agent, List[Gene]]) -> float:
             distance = geodesic((loc1.lat, loc1.lon), (loc2.lat, loc2.lon)).kilometers
             distance_per_agent += distance
         distance_data.append(distance_per_agent)
-    return np.mean(distance_data)
+    return np.max(distance_data)
 
 
 def _get_total_visits_penalty(
-    individual: Individual, agents: List[Agent]
+    agents_map: Dict[Agent, List[Gene]], agents: List[Agent]
 ) -> Tuple[float, float]:
-    agents_per_visit_map = {}
-    for gene in individual:
-        if gene.agent not in agents_per_visit_map:
-            agents_per_visit_map[gene.agent] = 0
-        agents_per_visit_map[gene.agent] += 1
-
     idle_penalty = 0
     for agent in agents:
-        if agent not in agents_per_visit_map:
+        if agent not in agents_map:
             idle_penalty += PENALTY_FACTOR * 1000
-            agents_per_visit_map[agent] = 0
 
-    num_visits = [v for _, v in agents_per_visit_map.items()]
-    std_dev = np.std(num_visits)
-    uneven_penalty = std_dev * PENALTY_FACTOR
-    return (idle_penalty, uneven_penalty)
+    num_visits = [len(v) for _, v in agents_map.items()]
+    return (idle_penalty, np.std(num_visits))
 
 
 def is_valid_solution(locations: List[Location], individual: Individual) -> bool:

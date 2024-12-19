@@ -10,9 +10,10 @@ def plot_genetic_algorithm_score(x, y):
     plt.close("all")
     fig, ax = plt.subplots(figsize=(4, 4), dpi=100)
     ax.plot(x, y)
-    ax.set_xlabel("Generation")
+    ax.set_xlabel("Geração")
     ax.set_ylabel("Score")
     ax.legend()
+    fig.tight_layout()
 
     return fig
 

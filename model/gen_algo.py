@@ -3,7 +3,7 @@ import random
 import copy
 
 from lib.population import gen_houses, gen_agents, gen_random_initial_population
-from lib.metrics import fitness
+from lib.metrics import fitness, fitness_data
 from model.types import Individual, Gene
 
 
@@ -58,7 +58,8 @@ class GeneticAlgorithm:
 
         # Debugging
         if generation < 10 or generation % 10 == 0:
-            print(f"::Generation {generation}: {best_individual_score}")
+            data = fitness_data(best_individual, self.agents)
+            print(f"::Generation {generation}: {data}")
 
         new_population = [best_individual]
 
@@ -100,8 +101,7 @@ class GeneticAlgorithm:
             idx1, idx2 = random.sample(range(n), 2)
             gene1: Gene = mutated_individual[idx1]
             gene2: Gene = mutated_individual[idx2]
-            gene1.location, gene2.location = gene2.location, gene1.location
-
+            gene1.agent, gene2.agent = gene2.agent, gene1.agent
             mutated_individual[idx1] = gene1
             mutated_individual[idx2] = gene2
 
