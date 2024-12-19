@@ -60,13 +60,13 @@ def _get_total_distance(individual: Individual) -> float:
 def _get_mean_distance(agents_map: Dict[Agent, List[Gene]]) -> float:
     distance_data = []
     for _, genes in agents_map.items():
-        mean_per_agent = []
+        distance_per_agent = 0
         for i in range(1, len(genes)):
             loc2: Location = genes[i - 1].location
             loc1: Location = genes[i].location
             distance = geodesic((loc1.lat, loc1.lon), (loc2.lat, loc2.lon)).kilometers
-            mean_per_agent.append(distance)
-        distance_data.append(np.mean(mean_per_agent))
+            distance_per_agent += distance
+        distance_data.append(distance_per_agent)
     return np.mean(distance_data)
 
 

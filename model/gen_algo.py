@@ -100,7 +100,6 @@ class GeneticAlgorithm:
             idx1, idx2 = random.sample(range(n), 2)
             gene1: Gene = mutated_individual[idx1]
             gene2: Gene = mutated_individual[idx2]
-            gene1.agent, gene2.agent = gene2.agent, gene1.agent
             gene1.location, gene2.location = gene2.location, gene1.location
 
             mutated_individual[idx1] = gene1
