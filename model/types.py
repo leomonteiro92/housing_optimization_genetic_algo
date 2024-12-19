@@ -24,7 +24,7 @@ class Gene:
     location: Location
 
     def __hash__(self):
-        return hash((self.agent, self.location.label))
+        return hash((self.agent, self.location.label, self.visit_date))
 
 
 type Individual = List[Gene]

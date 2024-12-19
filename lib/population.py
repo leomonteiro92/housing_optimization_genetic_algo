@@ -50,9 +50,10 @@ def _gen_random_individual(houses: List[Location], agents: List[str]) -> Individ
             # Para cada casa assignalada para um agente, vamos aleatóriamente selecionar uma data de visita
             # (com um D-5 de antecedência)
             start_date = date_min - MIN_ADVANCED_DAYS_TIMEDELTA
-            end_date = house.deadline - MIN_ADVANCED_DAYS_TIMEDELTA
-            random_days = random.randint(0, (end_date - start_date).days)
-            visit_date = start_date + timedelta(days=random_days)
+            # end_date = house.deadline - MIN_ADVANCED_DAYS_TIMEDELTA
+            # random_days = random.randint(0, (end_date - start_date).days)
+            # visit_date = start_date + timedelta(days=random_days)
+            visit_date = start_date
 
             result.append(
                 Gene(agent=agents[idx], visit_date=visit_date, location=house)

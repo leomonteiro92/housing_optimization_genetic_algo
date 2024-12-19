@@ -1,8 +1,8 @@
 import numpy as np
-from typing import Tuple, List, Set
+from typing import Tuple, List, Set, Dict
 from geopy.distance import geodesic
 
-from model.types import Location, Individual, Agent
+from model.types import Location, Individual, Gene, Agent
 
 PENALTY_FACTOR = 100
 
@@ -14,14 +14,20 @@ def fitness(
 ) -> float:
     (w1, w2, w3, w4) = weigths
 
-    total_dist = _get_total_distance(individual)
+    agents_visit_map: Dict[Agent, List[Gene]] = {}
+    for gene in individual:
+        if gene.agent not in agents_visit_map:
+            agents_visit_map[gene.agent] = []
+        agents_visit_map[gene.agent].append(gene)
+
+    mean_dist = _get_mean_distance(agents_visit_map)
     total_date_penalty = _get_total_date_penalty(individual)
     (idle_agents_penalty, uneven_visits_penalty) = _get_total_visits_penalty(
         individual, agents
     )
 
     return (
-        w1 * total_dist
+        w1 * mean_dist
         + w2 * total_date_penalty
         + w3 * idle_agents_penalty
         + w4 * uneven_visits_penalty
@@ -38,7 +44,7 @@ def _get_total_date_penalty(individual: Individual) -> float:
             penalty_data.append(PENALTY_FACTOR / 2)
         else:
             penalty_data.append(10 / abs(delta_days))
-    return np.sum(penalty_data)
+    return np.mean(penalty_data)
 
 
 def _get_total_distance(individual: Individual) -> float:
@@ -49,6 +55,19 @@ def _get_total_distance(individual: Individual) -> float:
         distance = geodesic((loc1.lat, loc1.lon), (loc2.lat, loc2.lon)).kilometers
         distance_data.append(distance)
     return np.sum(distance_data)
+
+
+def _get_mean_distance(agents_map: Dict[Agent, List[Gene]]) -> float:
+    distance_data = []
+    for _, genes in agents_map.items():
+        mean_per_agent = []
+        for i in range(1, len(genes)):
+            loc2: Location = genes[i - 1].location
+            loc1: Location = genes[i].location
+            distance = geodesic((loc1.lat, loc1.lon), (loc2.lat, loc2.lon)).kilometers
+            mean_per_agent.append(distance)
+        distance_data.append(np.mean(mean_per_agent))
+    return np.mean(distance_data)
 
 
 def _get_total_visits_penalty(

@@ -17,8 +17,20 @@ def plot_genetic_algorithm_score(x, y):
     return fig
 
 
-def _random_color():
-    return "#" + "".join([random.choice("0123456789ABCDEF") for _ in range(6)])
+colors = [
+    "red",
+    "blue",
+    "green",
+    "purple",
+    "orange",
+    "darkred",
+    "lightred",
+    "beige",
+    "darkblue",
+    "darkgreen",
+    "cadetblue",
+    "darkpurple",
+]
 
 
 def generate_map(
@@ -43,13 +55,13 @@ def generate_map(
             agentsMap[gene.agent] = []
         agentsMap[gene.agent].append(gene)
 
-    for _, agent in enumerate(agents):
+    for i, agent in enumerate(agents):
         route_coords = [
             (gene.location.lat, gene.location.lon) for gene in agentsMap[agent]
         ]
         folium.PolyLine(
             route_coords,
-            color=_random_color(),
+            color=colors[i % len(colors)],
             weight=4,
             opacity=0.7,
             tooltip=f"Agent: {agent}",
