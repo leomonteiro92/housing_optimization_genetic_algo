@@ -12,8 +12,8 @@ class GeneticAlgorithm:
         self,
         population_size: int,
         mutation_rate: float,
-        distance_weight: float = 0.25,
-        date_penalty_weight: float = 0.25,
+        distance_weight: float = 0.5,
+        date_penalty_weight: float = 0.0,
         idle_agents_penalty_weight: float = 0.25,
         uneven_visits_penalty_weight: float = 0.25,
     ):
@@ -73,31 +73,23 @@ class GeneticAlgorithm:
         self.population = new_population
 
     def crossover(self, parent1: Individual, parent2: Individual) -> Individual:
-        genes_set = set(parent1 + parent2)
-
-        genes_list = list(genes_set)
+        genes_list = list(parent1 + parent2)
         child = []
         while len(genes_list) > 0:
             chosen_gene = random.choice(genes_list)
             child.append(chosen_gene)
-            without_location = [
+            genes_list = [
                 gene for gene in genes_list if gene.location != chosen_gene.location
             ]
-            genes_list = without_location
 
         return child
 
     def mutate(self, individual: Individual) -> Individual:
-        if random.random() < self.mutation_rate:
-            return individual
-
         n = len(individual)
-        if n < 2:
-            return individual
 
         mutated_individual = copy.deepcopy(individual)
 
-        for _ in range(int(n * self.mutation_rate)):
+        for _ in range(100):
             idx1, idx2 = random.sample(range(n), 2)
             gene1: Gene = mutated_individual[idx1]
             gene2: Gene = mutated_individual[idx2]

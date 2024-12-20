@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from typing import Tuple, List, Set, Dict
 from geopy.distance import geodesic
 
@@ -29,8 +30,8 @@ def fitness(
     return (
         w1 * mean_dist
         + w2 * total_date_penalty
-        + w3 * idle_agents_penalty
-        + w4 * uneven_visits_penalty
+        + 0 * idle_agents_penalty
+        + 0 * uneven_visits_penalty
     )
 
 
@@ -67,16 +68,6 @@ def _get_total_date_penalty(individual: Individual) -> float:
     return np.mean(penalty_data)
 
 
-def _get_total_distance(individual: Individual) -> float:
-    distance_data = []
-    for i in range(1, len(individual)):
-        loc2: Location = individual[i - 1].location
-        loc1: Location = individual[i].location
-        distance = geodesic((loc1.lat, loc1.lon), (loc2.lat, loc2.lon)).kilometers
-        distance_data.append(distance)
-    return np.sum(distance_data)
-
-
 def _get_mean_distance(agents_map: Dict[Agent, List[Gene]]) -> float:
     distance_data = []
     for _, genes in agents_map.items():
@@ -108,3 +99,19 @@ def is_valid_solution(locations: List[Location], individual: Individual) -> bool
         visited_locations.add(gene.location)
 
     return len(visited_locations) == len(locations)
+
+
+def _agents_distance(agents_map: Dict[Agent, List[Gene]]) -> pd.DataFrame:
+    distances_per_agent = {}
+    for agent, genes in agents_map.items():
+        distance_per_agent = 0
+        for i in range(1, len(genes)):
+            loc2: Location = genes[i - 1].location
+            loc1: Location = genes[i].location
+            distance = geodesic((loc1.lat, loc1.lon), (loc2.lat, loc2.lon)).kilometers
+            distance_per_agent += distance
+        distances_per_agent[agent] = distance_per_agent
+
+    return pd.DataFrame.from_dict(
+        distances_per_agent, orient="index", columns=["Distance (km)"]
+    )
