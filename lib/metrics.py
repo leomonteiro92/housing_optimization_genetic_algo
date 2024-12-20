@@ -11,7 +11,7 @@ PENALTY_FACTOR = 100
 def fitness(
     individual: Individual,
     agents: List[Agent],
-    weigths: Tuple[float, float, float, float],
+    weigths: Tuple[float, float, float, float] = (0.25, 0.25, 0.25, 0.25),
 ) -> float:
     (w1, w2, w3, w4) = weigths
 
