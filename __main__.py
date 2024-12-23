@@ -1,5 +1,5 @@
 import time
-from utils import print_individual, generate_map
+from utils import print_individual, generate_map, get_dataframes
 
 from model.gen_algo import GeneticAlgorithm
 
@@ -16,5 +16,7 @@ for i in range(MAX_GENERATIONS):
     best_individual_score = model.best_fitness_scores[-1]
     time.sleep(0)
 
-print_individual(model.best_solution)
+(df_locations, df_agents) = get_dataframes(model.best_solution)
+print(df_locations)
+print(df_agents)
 generate_map(model.houses, model.agents, model.best_solution).save("best_route.html")

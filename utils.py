@@ -1,7 +1,8 @@
 import folium
 import random
 import numpy as np
-from typing import List
+import pandas as pd
+from typing import List, Tuple
 from model.types import Individual, Location, Agent
 import matplotlib.pyplot as plt
 
@@ -81,3 +82,40 @@ def print_individual(individual: Individual):
         sorted_genes = sorted(genes, key=lambda x: x.visit_date)
         route = [f"{gene.location.label} on {gene.visit_date}" for gene in sorted_genes]
         print(f"Agent: {agent} - Route: {route}")
+
+
+def get_dataframes(individual: Individual) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    locationsMap = {}
+    agentsMap = {}
+    for gene in individual:
+        if gene.agent not in agentsMap:
+            agentsMap[gene.agent] = {
+                "total_visits": 0,
+                "coords": [],
+            }
+        agentsMap[gene.agent]["total_visits"] += 1
+        agentsMap[gene.agent]["coords"].append((gene.location.lat, gene.location.lon))
+
+        if gene.location.label not in locationsMap:
+            locationsMap[gene.location.label] = {
+                "label": gene.location.label,
+                "deadline": gene.location.deadline,
+                "visit_date": gene.visit_date,
+                "delta": abs(gene.visit_date - gene.location.deadline),
+                "agent": gene.agent,
+            }
+
+    # calculate distances by agent
+    for agent, data in agentsMap.items():
+        total_distance = 0
+        for i in range(len(data["coords"]) - 1):
+            total_distance += np.linalg.norm(
+                np.array(data["coords"][i]) - np.array(data["coords"][i + 1])
+            )
+        agentsMap[agent]["total_distance"] = total_distance
+        del agentsMap[agent]["coords"]
+
+    return (
+        pd.DataFrame(locationsMap).T,
+        pd.DataFrame(agentsMap).T,
+    )
