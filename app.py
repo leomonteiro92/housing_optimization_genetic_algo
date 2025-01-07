@@ -10,21 +10,7 @@ st.set_page_config(
     page_title="Genetic Algorithm",
 )
 
-
-def run_generations(model: GeneticAlgorithm, max_generations: int) -> float:
-    for _ in range(max_generations):
-        model.evolve()
-        time.sleep(0)
-
-        best_individual_score = model.best_fitness_scores[-1]
-        fig = plot_genetic_algorithm_score(
-            range(len(model.best_fitness_scores)), model.best_fitness_scores
-        )
-        plot_placeholder.pyplot(fig)
-        with map2_placeholder:
-            m2 = generate_map(model.houses, model.agents, model.best_solution)
-            folium_static(m2)
-    return best_individual_score
+model: GeneticAlgorithm = GeneticAlgorithm(10, 0.8)
 
 
 if "play" not in st.session_state:
@@ -40,12 +26,6 @@ def handle_play():
     st.session_state.pause = False
     st.session_state.reset = False
     model: GeneticAlgorithm = GeneticAlgorithm(population_size, mutation_rate)
-    with map1_placeholder:
-        m1 = generate_map(model.houses, model.agents, model.population[0])
-        folium_static(m1)
-    with map1_placeholder:
-        st.spinner("Calculando melhor rota...")
-    run_generations(model, max_generations)
 
 
 def handle_pause():
@@ -101,3 +81,27 @@ with col2:
     map1_placeholder = col2.empty()
     col2.write("### Melhor rota")
     map2_placeholder = col2.empty()
+
+
+def run_generations(model: GeneticAlgorithm, max_generations: int) -> float:
+    for _ in range(max_generations):
+        model.evolve()
+        time.sleep(0)
+
+        best_individual_score = model.best_fitness_scores[-1]
+        fig = plot_genetic_algorithm_score(
+            range(len(model.best_fitness_scores)), model.best_fitness_scores
+        )
+        plot_placeholder.pyplot(fig)
+        with map2_placeholder:
+            m2 = generate_map(model.houses, model.agents, model.best_solution)
+            folium_static(m2)
+    return best_individual_score
+
+
+with map1_placeholder:
+    m1 = generate_map(model.houses, model.agents, model.population[0])
+    folium_static(m1)
+with map1_placeholder:
+    st.spinner("Calculando melhor rota...")
+run_generations(model, max_generations)
