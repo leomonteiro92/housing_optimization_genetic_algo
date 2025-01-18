@@ -2,8 +2,8 @@ import itertools
 import random
 import copy
 
-from lib.population import gen_houses, gen_agents, gen_random_initial_population
-from lib.metrics import fitness, fitness_data
+from lib.population import gen_locations, gen_agents, gen_random_initial_population
+from lib.metrics import fitness
 from model.types import Individual, Gene
 
 
@@ -12,41 +12,33 @@ class GeneticAlgorithm:
         self,
         population_size: int,
         mutation_rate: float,
-        distance_weight: float = 0.5,
-        date_penalty_weight: float = 0.0,
-        idle_agents_penalty_weight: float = 0.25,
-        uneven_visits_penalty_weight: float = 0.25,
     ):
         self.population_size = population_size
         self.mutation_rate = mutation_rate
-        self.houses = gen_houses(25)
+        self.locations = gen_locations(25)
         self.agents = gen_agents(6)
         self.population = gen_random_initial_population(
-            self.population_size, self.houses, self.agents
+            self.population_size, self.locations, self.agents
         )
         self.best_solution = None
         self.best_fitness_scores = []
         self.generation_counter = itertools.count(start=1)
-        self.weights = (
-            distance_weight,
-            date_penalty_weight,
-            idle_agents_penalty_weight,
-            uneven_visits_penalty_weight,
-        )
+        self.weights = (0.5, 0.5)
 
     def reset(self):
         self.best_solutions = []
         self.best_fitness_scores = []
         self.population = gen_random_initial_population(
-            self.population_size, self.houses, self.agents
+            self.population_size, self.locations, self.agents
         )
         self.generation_counter = itertools.count(start=1)
 
     def evolve(self):
         generation = next(self.generation_counter)
 
+        # Seleção baseada em ranking, os melhores scores são selecionados
         scores = [
-            fitness(individual, self.agents, self.weights)
+            fitness(individual, self.agents, self.locations, self.weights).score
             for individual in self.population
         ]
         sorted_population = sorted(zip(self.population, scores), key=lambda x: x[1])
@@ -58,8 +50,10 @@ class GeneticAlgorithm:
 
         # Debugging
         if generation < 10 or generation % 10 == 0:
-            data = fitness_data(best_individual, self.agents)
-            print(f"::Generation {generation}: {data}")
+            score = fitness(
+                best_individual, self.agents, self.locations, self.weights
+            ).score
+            print(f"::Generation {generation}: {score}")
 
         new_population = [best_individual]
 
@@ -72,6 +66,12 @@ class GeneticAlgorithm:
 
         self.population = new_population
 
+    # Scattered crossover adaptado
+    # Aleatoriamente seleciona um gene de um parent ou de outro
+    # Para garantir que o individuo child seja válido,
+    # quando selecionamos um gene de um parent, automáticamente removemos o gene
+    # que contém a location que foi selecionada (assim não resulta em uma location
+    # ser visitada 2x)
     def crossover(self, parent1: Individual, parent2: Individual) -> Individual:
         genes_list = list(parent1 + parent2)
         child = []
@@ -81,9 +81,11 @@ class GeneticAlgorithm:
             genes_list = [
                 gene for gene in genes_list if gene.location != chosen_gene.location
             ]
-
         return child
 
+    # Swap mutation + random mutation
+    # Aleatoriamente, selecionamos 2 genes e fazemos um swap do agente (swap mutation)
+    # Selecionamentos alguns genes e alteramos a data de visita (random mutation)
     def mutate(self, individual: Individual) -> Individual:
         n = len(individual)
 

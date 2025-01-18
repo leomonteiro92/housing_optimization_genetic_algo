@@ -7,11 +7,11 @@ from model.types import Location, Individual, Agent, Gene
 # SP Zona Centro Sul
 lat_min, lat_max = -23.55, -23.60
 lon_min, lon_max = -46.62, -46.65
-date_min, date_max = date(2024, 1, 1), date(2024, 1, 31)
+date_min, date_max = date(2025, 1, 1), date(2025, 1, 31)
 MIN_ADVANCED_DAYS_TIMEDELTA = timedelta(days=5)
 
 
-def gen_houses(n: int) -> List[Location]:
+def gen_locations(n: int) -> List[Location]:
     houses: List[Location] = []
     date_delta = date_max - date_min
     for idx in range(n):
@@ -50,10 +50,10 @@ def _gen_random_individual(houses: List[Location], agents: List[str]) -> Individ
             # Para cada casa assignalada para um agente, vamos aleatóriamente selecionar uma data de visita
             # (com um D-5 de antecedência)
             start_date = date_min - MIN_ADVANCED_DAYS_TIMEDELTA
-            # end_date = house.deadline - MIN_ADVANCED_DAYS_TIMEDELTA
-            # random_days = random.randint(0, (end_date - start_date).days)
-            # visit_date = start_date + timedelta(days=random_days)
-            visit_date = start_date
+            end_date = house.deadline - MIN_ADVANCED_DAYS_TIMEDELTA
+            random_days = random.randint(0, (end_date - start_date).days)
+            visit_date = start_date + timedelta(days=random_days)
+            # visit_date = start_date
 
             result.append(
                 Gene(agent=agents[idx], visit_date=visit_date, location=house)

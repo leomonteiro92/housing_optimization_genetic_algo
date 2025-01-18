@@ -1,7 +1,7 @@
-import time
 import streamlit as st
 from streamlit_folium import folium_static
 
+from lib.metrics import fitness
 from utils import generate_map, plot_genetic_algorithm_score
 from model.gen_algo import GeneticAlgorithm
 
@@ -75,6 +75,10 @@ col1, col2 = st.columns(2)
 with col1:
     col1.write("### Gerações vs Scores")
     plot_placeholder = col1.empty()
+    col1.write("### Métricas da população inicial")
+    initial_table_placeholder = col1.empty()
+    col1.write("### Métricas da última geração")
+    table_placeholder = col1.empty()
 
 with col2:
     col2.write("### Rota inicial")
@@ -84,23 +88,28 @@ with col2:
 
 
 def run_generations(model: GeneticAlgorithm, max_generations: int) -> float:
+    initial_table_placeholder.table(
+        fitness(model.population[0], model.agents, model.locations).as_table()
+    )
     for _ in range(max_generations):
         model.evolve()
-        time.sleep(0)
 
         best_individual_score = model.best_fitness_scores[-1]
         fig = plot_genetic_algorithm_score(
             range(len(model.best_fitness_scores)), model.best_fitness_scores
         )
+        table_placeholder.table(
+            fitness(model.best_solution, model.agents, model.locations).as_table()
+        )
         plot_placeholder.pyplot(fig)
         with map2_placeholder:
-            m2 = generate_map(model.houses, model.agents, model.best_solution)
+            m2 = generate_map(model.locations, model.agents, model.best_solution)
             folium_static(m2)
     return best_individual_score
 
 
 with map1_placeholder:
-    m1 = generate_map(model.houses, model.agents, model.population[0])
+    m1 = generate_map(model.locations, model.agents, model.population[0])
     folium_static(m1)
 with map1_placeholder:
     st.spinner("Calculando melhor rota...")
