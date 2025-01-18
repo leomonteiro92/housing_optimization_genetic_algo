@@ -1,9 +1,10 @@
-import streamlit as st
 from streamlit_folium import folium_static
+import streamlit as st
 
+from model.gen_algo import GeneticAlgorithm
 from model.metrics import fitness
 from utils import generate_map, plot_genetic_algorithm_score
-from model.gen_algo import GeneticAlgorithm
+
 
 st.set_page_config(
     layout="wide",

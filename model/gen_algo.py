@@ -1,9 +1,9 @@
+import copy
 import itertools
 import random
-import copy
 
-from model.population import gen_locations, gen_agents, gen_random_initial_population
 from model.metrics import fitness
+from model.population import gen_locations, gen_agents, gen_random_initial_population
 from model.types import Individual, Gene
 
 

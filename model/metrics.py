@@ -1,8 +1,8 @@
+from dataclasses import dataclass
+from geopy.distance import geodesic
+from typing import Tuple, List, Dict
 import numpy as np
 import pandas as pd
-from typing import Tuple, List, Dict
-from geopy.distance import geodesic
-from dataclasses import dataclass
 
 from model.types import Location, Individual, Gene, Agent
 

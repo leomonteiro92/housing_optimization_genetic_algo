@@ -1,8 +1,9 @@
-import folium
-import numpy as np
 from typing import List
-from model.types import Individual, Location, Agent
+import folium
 import matplotlib.pyplot as plt
+import numpy as np
+
+from model.types import Individual, Location, Agent
 
 
 def plot_genetic_algorithm_score(x, y):

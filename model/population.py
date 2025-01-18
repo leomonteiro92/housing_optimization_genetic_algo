@@ -1,6 +1,6 @@
-import random
 from datetime import date, timedelta
 from typing import List
+import random
 
 from model.types import Location, Individual, Agent, Gene
 
