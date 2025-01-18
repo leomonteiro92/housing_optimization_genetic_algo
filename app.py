@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_folium import folium_static
 
-from lib.metrics import fitness
+from model.metrics import fitness
 from utils import generate_map, plot_genetic_algorithm_score
 from model.gen_algo import GeneticAlgorithm
 

@@ -2,8 +2,8 @@ import itertools
 import random
 import copy
 
-from lib.population import gen_locations, gen_agents, gen_random_initial_population
-from lib.metrics import fitness
+from model.population import gen_locations, gen_agents, gen_random_initial_population
+from model.metrics import fitness
 from model.types import Individual, Gene
 
 
