@@ -16,7 +16,7 @@ class GeneticAlgorithm:
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.locations = gen_locations(25)
-        self.agents = gen_agents(6)
+        self.agents = gen_agents(3)
         self.population = gen_random_initial_population(
             self.population_size, self.locations, self.agents
         )
@@ -49,11 +49,11 @@ class GeneticAlgorithm:
         self.best_fitness_scores.append(best_individual_score)
 
         # Debugging
-        if generation < 10 or generation % 10 == 0:
-            score = fitness(
-                best_individual, self.agents, self.locations, self.weights
-            ).score
-            print(f"::Generation {generation}: {score}")
+        # if generation < 10 or generation % 10 == 0:
+        #     score = fitness(
+        #         best_individual, self.agents, self.locations, self.weights
+        #     ).score
+        #     print(f"::Generation {generation}: {score}")
 
         new_population = [best_individual]
 
@@ -69,7 +69,7 @@ class GeneticAlgorithm:
     # Scattered crossover adaptado
     # Aleatoriamente seleciona um gene de um parent ou de outro
     # Para garantir que o individuo child seja válido,
-    # quando selecionamos um gene de um parent, automáticamente removemos o gene
+    # quando selecionamos um gene de um parent, automaticamente removemos o gene
     # que contém a location que foi selecionada (assim não resulta em uma location
     # ser visitada 2x)
     def crossover(self, parent1: Individual, parent2: Individual) -> Individual:
@@ -83,7 +83,7 @@ class GeneticAlgorithm:
             ]
         return child
 
-    # Swap mutation + random mutation
+    # Swap mutation
     # Aleatoriamente, selecionamos 2 genes e fazemos um swap do agente (swap mutation)
     # Selecionamentos alguns genes e alteramos a data de visita (random mutation)
     def mutate(self, individual: Individual) -> Individual:
