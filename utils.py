@@ -41,13 +41,17 @@ def generate_map(
         np.mean([gene.location.lat for gene in individual]),
         np.mean([gene.location.lon for gene in individual]),
     ]
-    m = folium.Map(location=map_center, zoom_start=14)
+    m = folium.Map(location=map_center, zoom_start=13)
 
     for house in houses:
-        folium.Marker(
+        folium.CircleMarker(
             location=[house.lat, house.lon],
+            radius=5,
             popup=f"Deadline: {house.label}",
-            icon=folium.Icon(color="blue", icon="info-sign"),
+            color="black",
+            fill=False,
+            fill_color="transparent",
+            fill_opacity=0.7,
         ).add_to(m)
 
     agentsMap = {}
